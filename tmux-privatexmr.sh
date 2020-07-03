@@ -2,53 +2,40 @@
 
 cd ~
 
+TESTNET_PATH=~/private_testnet
 # tmux session name
-SN=PRIVXMR
+SN=PRIVQWC
 
 tmux kill-session -t $SN
 
-cd ~/testnet 
+cd $TESTNET_PATH 
 
 
 # nodes window
 
 # start node_01 (initial session)
-tmux new-session -d -s $SN -n nodes -- sh -ic 'echo node_01 && monerod --testnet  --no-igd --hide-my-port --data-dir ~/testnet/node_01 --p2p-bind-ip 127.0.0.1 --log-level 0 --add-exclusive-node 127.0.0.1:38080 --add-exclusive-node 127.0.0.1:48080  --fixed-difficulty 100 || read WHATEVER'
+tmux new-session -d -s $SN -n nodes -- sh -ic './qwertycoind --hide-my-port --data-dir node_01 --p2p-bind-ip 127.0.0.1 --log-level 2 --add-exclusive-node 127.0.0.1:38080 --add-exclusive-node 127.0.0.1:48080 || read WHATEVER'
 
 # start node_02
 tmux split-window -dv
 tmux select-pane -t 1
-#tmux send-keys  "cd ~/onion-monero-blockchain-explorer/build && sleep 20  && startxmrblocksmainet" C-m
-tmux split-window -dh      -- sh -ic 'echo node_02 && monerod --testnet --p2p-bind-port 38080 --rpc-bind-port 38081 --zmq-rpc-bind-port 38082 --no-igd --hide-my-port  --log-level 0 --data-dir ~/testnet/node_02 --p2p-bind-ip 127.0.0.1 --add-exclusive-node 127.0.0.1:28080 --add-exclusive-node 127.0.0.1:48080 --fixed-difficulty 100 || read WHATEVER'
+tmux split-window -dh      
+tmux send './qwertycoind --p2p-bind-port 38080 --rpc-bind-port 38081 --hide-my-port --log-level 2 --data-dir node_02 --p2p-bind-ip 127.0.0.1 --add-exclusive-node 127.0.0.1:28080 --add-exclusive-node 127.0.0.1:48080 || read WHATEVER' ENTER
 
 # start node_03
-tmux select-pane -t 3
-tmux split-window -dh      -- sh -ic 'echo node_03 && monerod --testnet --p2p-bind-port 48080 --rpc-bind-port 48081 --zmq-rpc-bind-port 48082 --no-igd --hide-my-port  --log-level 0 --data-dir ~/testnet/node_03 --p2p-bind-ip 127.0.0.1 --add-exclusive-node 127.0.0.1:28080 --add-exclusive-node 127.0.0.1:38080 --fixed-difficulty 100 || read WHATEVER'
-
+tmux select-pane -t 2
+tmux send './qwertycoind --p2p-bind-port 48080 --rpc-bind-port 48081 --hide-my-port --log-level 2 --data-dir node_03 --p2p-bind-ip 127.0.0.1 --add-exclusive-node 127.0.0.1:28080 --add-exclusive-node 127.0.0.1:38080 || read WHATEVER' ENTER
 
 # wallets window
 
 # start wallet_01 (first pane in new window)
-tmux new-window -n wallets -c ~/testnet -- sh -ic 'echo wallet_01 && monero-wallet-cli --testnet --trusted-daemon --wallet-file ./wallet_01.bin --password "" --log-file ./wallet_01.log || read WHATEVER'
+tmux new-window -n wallets -c $TESTNET_PATH -- sh -ic 'echo wallet_01 && ./simplewallet --wallet-file wallet_01.bin --password '' --log-file wallet_01.log || read WHATEVER'
 
 # start wallet_02
 tmux split-window -dv
 tmux select-pane -t 1
-tmux split-window -dh       -- sh -ic 'echo wallet_02 && monero-wallet-cli --testnet --daemon-port 38081 --trusted-daemon --wallet-file ./wallet_02.bin --password "" --log-file ./wallet_02.log || read WHATEVER'
+tmux send './simplewallet --daemon-port 38081 --wallet-file wallet_02.bin --password '' --log-file wallet_02.log || read WHATEVER' ENTER
 
-# start wallet_03
-tmux select-pane -t 3
-tmux split-window -dh       -- sh -ic 'echo wallet_03 && monero-wallet-cli --testnet --daemon-port 48081 --trusted-daemon --wallet-file ./wallet_03.bin --password "" --log-file ./wallet_03.log || read WHATEVER'
-
-
-# explorer window
-# start the explorer for the private testnet network
-
-cd ~/onion-monero-blockchain-explorer/build 
-tmux new-window -n explorer -- sh -ic "echo xmrblocks && ./xmrblocks -t -p 9999 -b $HOME/testnet/node_01/testnet/lmdb/ --no-blocks-on-index 50 --enable-as-hex --enable-pusher || read WHATEVER"
-
-tmux split-window -v
-tmux select-pane -t 0
 
 # open second (wallets) tmux window
 tmux select-window -t 1
