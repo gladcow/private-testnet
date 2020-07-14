@@ -7,6 +7,9 @@
 TESTNET_PATH=~/private_testnet
 BIN_PATH=~/src/qwertycoin-testnet/build
 
+# remove old installation
+rm -rf $TESTNET_PATH
+
 # create testnet directory
 mkdir $TESTNET_PATH
 mkdir $TESTNET_PATH/node_03
